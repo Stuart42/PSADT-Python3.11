@@ -7,4 +7,7 @@ This install has also been customized with the 'truststore' package pre-installe
 This should avoid certificate issues when installing Python modules.
 
 https://pip.pypa.io/en/stable/topics/https-certificates/
+
 https://pip.pypa.io/en/stable/topics/configuration/
+
+https://packaging.python.org/en/latest/tutorials/installing-packages/
