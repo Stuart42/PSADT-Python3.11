@@ -140,11 +140,15 @@ Try {
 				Write-Log -Message "Could not find install file for Python $RemoveVersion, unable to remove "
 
 			} else {
-				Write-Log -Message "Removing $RemoveVersion with installer at path $dirSupportFiles\$UninstallPath"
+				Write-Log -Message "Removing $RemoveVersion with installer at path $dirSupportFiles\$($UninstallPath.FullName)"
 				## Remove old version
-				Execute-Process -Path $UninstallPath.FullName -Parameters "/quiet /Uninstall" -WindowStyle Hidden
-				Remove-MSIApplications -Name "Python $RemoveVersion"
-				Remove-MSIApplications -Name 'Python Launcher'
+				if (Test-Path $UninstallPath.FullName) {
+					Execute-Process -Path $($UninstallPath.FullName) -Parameters "/quiet /Uninstall" -WindowStyle Hidden
+					Remove-MSIApplications -Name "Python $RemoveVersion"
+					Remove-MSIApplications -Name 'Python Launcher'
+				} else {
+					Write-Log -Message "Unable to verify uninstaller, aborting removal"
+				}
 			}
 		}
 
@@ -175,6 +179,18 @@ Try {
 		[string]$installPhase = 'Post-Installation'
 
 		## <Perform Post-Installation tasks here>
+		$PyPath = 'C:\Windows\py.exe'
+		if (Test-Path $PyPath) {
+			Execute-Process -Path $PyPath -Parameters "-m pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org truststore" -WindowStyle Hidden
+			$pipConfigPath = 'C:\ProgramData\pip'
+			if ( !(Test-Path $pipConfigPath)) {
+				New-Item -Path $pipConfigPath -Type Directory
+			}
+
+			Copy-File -Path "$dirFiles\pip.ini" -Destination "$pipConfigPath\pip.ini"
+		} else {
+			Write-Log -Message 'Py.exe not found, skipping pip install truststore and pip.ini file configuration'
+		}
 
 		## Display a message at the end of the install
 		#If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait }
@@ -207,10 +223,15 @@ Try {
 		}
 
 		$InstallerPath = (Get-ChildItem $dirFiles -Filter "Python-*.exe" | Select-Object -First 1)
-		Write-Log -Message "Removing using $InstallerPath"
-		Execute-Process -Path $InstallerPath.FullName -Parameters "/quiet /Uninstall" -WindowStyle Hidden
-		Remove-MSIApplications -Name 'Python 3'
-		Remove-MSIApplications -Name 'Python Launcher'
+		if (Test-Path $InstallerPath) {
+			Write-Log -Message "Removing using $InstallerPath"
+			Execute-Process -Path $InstallerPath.FullName -Parameters "/quiet /Uninstall" -WindowStyle Hidden
+			Remove-MSIApplications -Name 'Python 3'
+			Remove-MSIApplications -Name 'Python Launcher'
+		} else {
+			Write-Log -Message 'Installer file not found for uninstall.. skipping.'
+		}
+
 
 		# <Perform Uninstallation tasks here>
 
