@@ -1,9 +1,14 @@
+## Updating Python Application
 When building Python, make sure to get the offline files. They should end up in the 'Files' folder with the installer.
 
-Similar to this command:
+### Download Python command:
 .\python-3.11.0-amd64.exe /layout .\
 
-This install has also been customized with the 'truststore' package pre-installed, and the pip configuration set to use it.
+Make sure to edit the unattend.xml in the Files folder with the correct path for the version of Python you are creating
+
+
+This install has also been customized to install the 'truststore' package by trusting the python servers, and copies pip.ini with configuration set to use the truststore package.
+
 This should avoid certificate issues when installing Python modules.
 
 https://pip.pypa.io/en/stable/topics/https-certificates/
