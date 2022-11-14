@@ -223,7 +223,7 @@ Try {
 		}
 
 		$InstallerPath = (Get-ChildItem $dirFiles -Filter "Python-*.exe" | Select-Object -First 1)
-		if (Test-Path $InstallerPath) {
+		if (Test-Path $($InstallerPath.FullName)) {
 			Write-Log -Message "Removing using $InstallerPath"
 			Execute-Process -Path $InstallerPath.FullName -Parameters "/quiet /Uninstall" -WindowStyle Hidden
 			Remove-MSIApplications -Name 'Python 3'
